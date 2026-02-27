@@ -1,4 +1,4 @@
-/* css/style.css (FINAL - SINGLE SOURCE OF TRUTH, NO CONFLICTS) */
+
 
 :root{
   --text:#0b1220;
@@ -223,21 +223,37 @@ body{
    GLOBAL BACKGROUND FOR ALL SECTIONS (NO RESET LINE)
 ========================= */
 
-.page-glow{
+/* .page-glow{
   position: relative;
-  background: linear-gradient(135deg, #0b2545 0%, #102a52 55%, #0b2545 100%);
+  background: linear-gradient(135deg, #87CEEB 0%, #6ec6ff 55%, #4aa3f0 100%);
   color: #fff;
 }
 
-/* One glow layer for entire page */
 .page-glow::before{
   content:"";
   position:absolute;
   inset:0;
   background:
-    radial-gradient(700px 400px at 15% 25%, rgba(255,122,0,0.18), transparent 60%),
-    radial-gradient(700px 400px at 85% 70%, rgba(0,209,199,0.14), transparent 60%),
-    radial-gradient(900px 600px at 50% 110%, rgba(31,111,255,0.18), transparent 60%);
+    radial-gradient(800px 400px at 20% 20%, rgba(255,255,255,0.25), transparent 60%),
+   
+    radial-gradient(900px 500px at 80% 80%, rgba(255,255,255,0.15), transparent 60%);
+  pointer-events:none;
+  z-index:0;
+} */
+
+.page-glow{
+  position: relative;
+  background: linear-gradient(135deg, #3fa9f5 0%, #2f8fd8 50%, #247ac6 100%);
+  color: #fff;
+}
+
+.page-glow::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(800px 400px at 20% 20%, rgba(255,255,255,0.18), transparent 60%),
+    radial-gradient(900px 500px at 80% 80%, rgba(255,255,255,0.10), transparent 60%);
   pointer-events:none;
   z-index:0;
 }
@@ -253,6 +269,17 @@ body{
   background: transparent !important;
   color: #fff;
 }
+ .contact-glass:hover{
+    transform: translateY(-8px);
+    box-shadow: 0 40px 120px rgba(0,0,0,0.32);
+    border-color: rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.14); /* tiny lift only */
+  }
+
+  /* Optional: little zoom on map to feel alive */
+  .contact-glass:hover .map-frame{
+    box-shadow: 0 22px 70px rgba(0,0,0,0.25);
+  }
 
 /* =========================
    SECTIONS + HEADERS
@@ -341,6 +368,100 @@ body{
   color: var(--muted);
 }
 
+.project-wrap{
+  max-width: 1100px;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 24px;
+  align-items: stretch;
+  transition: transform .18s ease;
+}
+.project-image{
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+   transition: box-shadow .25s ease;
+}
+
+.project-image img{
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  object-fit: cover;
+  display: block;
+  transition: transform .45s ease;
+}
+
+.project-card{
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 26px;
+  padding: 26px 24px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 30px 90px rgba(0,0,0,0.25);
+  color: rgba(255,255,255,0.92);
+   transition: box-shadow .25s ease, border-color .25s ease;
+}
+
+.project-subtitle{
+  font-weight: 900;
+  letter-spacing: .2px;
+  color: rgba(255,255,255,0.95);
+}
+
+.project-list{
+  padding-left: 18px;
+
+  line-height: 1.9;
+  margin: 0;
+}
+
+.project-list li{
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 992px){
+  .project-wrap{
+    grid-template-columns: 1fr;
+  }
+  .project-image img{
+    min-height: 240px;
+  }
+}
+/* ===== Hover Effect for Projects ===== */
+
+@media (hover:hover){
+
+  .project-wrap:hover{
+    transform: translateY(-8px);
+  }
+
+  .project-wrap:hover .project-image{
+    box-shadow: 0 28px 80px rgba(0,0,0,0.35);
+  }
+
+  .project-wrap:hover .project-image img{
+    transform: scale(1.08);
+  }
+
+  .project-wrap:hover .project-card{
+    box-shadow: 0 40px 120px rgba(0,0,0,0.32);
+    border-color: rgba(255,255,255,0.28);
+  }
+
+  .project-list li{
+    transition: transform .15s ease, opacity .15s ease;
+  }
+
+  .project-list li:hover{
+    transform: translateX(4px);
+    opacity: 0.95;
+  }
+
+}
 /* =========================
    MINI FEATURES
 ========================= */
@@ -447,7 +568,9 @@ body{
 }
 .contact-line{
   color: rgba(255,255,255,0.90);
-  font-weight: 550;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.8;
 }
 .map-frame{
   height: 240px;
@@ -486,6 +609,21 @@ body{
   #about .glass-panel{ padding: 34px 22px; }
 }
 
+#about .glass-panel,
+.contact-glass{
+  transition: transform .18s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease;
+}
+
+@media (hover:hover){
+
+  /* INTRODUCTION card hover */
+  #about .glass-panel:hover{
+    transform: translateY(-8px);
+    box-shadow: 0 40px 120px rgba(0,0,0,0.32);
+    border-color: rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.16); /* tiny lift only */
+  }
+}
 /* =========================
    FOOTER (NO GAP)
 ========================= */
@@ -615,4 +753,76 @@ html, body{
   .hero-subtitle{
     font-size: 14px;
   }
+}
+/* =========================
+   SERVICES: IMAGE ABOVE CARD (FIXED)
+========================= */
+
+#services .service-item{
+  display: flex;
+  flex-direction: column;
+  transition: transform .18s ease;
+}
+
+#services .service-image{
+  width: 100%;
+  height: 400px;                  /* increase/decrease as you want */
+  border-radius: 24px;
+  overflow: hidden;               /* IMPORTANT: prevents spill */
+  margin-bottom: 14px;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.25);
+  transition: box-shadow .25s ease, transform .25s ease;
+}
+
+#services .service-image img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;              /* crop nicely */
+  display: block;                 /* removes inline gaps */
+  transform: scale(1.03);
+  transition: transform .45s ease;
+}
+
+/* Hover effect */
+#services .service-item:hover{
+  transform: translateY(-8px);
+}
+#services .service-item:hover .service-image{
+  box-shadow: 0 26px 75px rgba(0,0,0,0.35);
+}
+#services .service-item:hover .service-image img{
+  transform: scale(1.12);
+}
+#services .service-item:hover .glass-card{
+  box-shadow: var(--shadow);
+}
+
+/* responsive heights */
+@media (max-width: 992px){
+  #services .service-image{ height: 230px; }
+}
+@media (max-width: 768px){
+  #services .service-image{ height: 190px; }
+}
+@media (max-width: 420px){
+  #services .service-image{ height: 170px; }
+}
+
+/* Bigger map (width already 100% because it's inside container) */
+.map-frame.map-frame-lg{
+  height: 420px;   /* increase height */
+}
+
+/* On smaller screens */
+@media (max-width: 768px){
+  .map-frame.map-frame-lg{
+    height: 320px;
+  }
+}
+
+/* Optional: make address area look clean under the map */
+.contact-details{
+  text-align: left;
+  padding: 6px 6px 0;
 }
