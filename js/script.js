@@ -50,3 +50,49 @@ document.addEventListener("DOMContentLoaded", () => {
   // initial
   activate(document.querySelector(".project-switch-btn.is-active") || tabs[0]);
 });
+
+
+//hero image
+
+document.addEventListener("DOMContentLoaded", () => {
+  const herobg = document.getElementById("herobg");
+  if (!herobg) return;
+
+  const heroimages = [
+    "assets/heroimage.jpg",
+    "assets/hero2.jpg",
+    "assets/hero3.webp",
+    "assets/hero4.jpg",
+  ];
+
+  let current = 0;
+
+  function showImage(index) {
+    herobg.classList.remove("is-zooming");
+    herobg.style.opacity = "0";
+
+    setTimeout(() => {
+      herobg.style.backgroundImage = `url('${heroimages[index]}')`;
+      herobg.style.opacity = "1";
+
+      setTimeout(() => {
+        herobg.classList.add("is-zooming");
+      }, 50);
+    }, 800);
+  }
+
+  herobg.style.backgroundImage = `url('${heroimages[current]}')`;
+  herobg.style.opacity = "1";
+
+  setTimeout(() => {
+    herobg.classList.add("is-zooming");
+  }, 50);
+
+  setInterval(() => {
+    current = (current + 1) % heroimages.length;
+    showImage(current);
+  }, 5000);
+});
+
+
+
