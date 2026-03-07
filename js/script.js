@@ -96,3 +96,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+const navbar = document.querySelector(".navglass");
+window.addEventListener("scroll", function (){
+  if(window.scrollY > 80){
+  navbar.classList.add("scrolled");
+}
+  else {
+  navbar.classList.remove("scrolled");
+  }
+})
