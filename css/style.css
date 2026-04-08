@@ -1,4 +1,3 @@
-
 :root{
   --primary-red:#E53935;
   --primary-blue:#7A42D6;
@@ -403,15 +402,25 @@ body{
   flex: 0 0 auto;
 }
 
-.service-icon img{
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
+.service-icon i{
+  font-size: 30px;     /* bigger icon */
+  color: #000;         /* default black */
+  transition: all 0.3s ease;
+}
+
+#services .service-item:hover .service-icon i{
+  color: #b71c1c;      /* dark red on hover */
+  transform: scale(1.2);
 }
 
 .card-title{
   font-weight: 950;
   margin: 2px 0 6px;
+  transition: color 0.3s ease;
+}
+
+#services .service-item:hover .card-title{
+  color: #b71c1c;   /* dark red */
 }
 
 .card-text{
@@ -419,6 +428,7 @@ body{
   color:var(--muted);
   line-height: 1.55;
   font-size: 15px;
+  
 }
 
 #services .service-item:hover{
@@ -482,11 +492,25 @@ body{
   width: 30px;
   height: 30px;
   object-fit: contain;
+  
+}
+
+.mini-ico i{
+  color: #000;  /* black */
+    font-size: 26px;
+  transition: color 0.3s ease;
+}
+
+.mini-glass:hover .mini-ico i{
+  color: #b71c1c;  /* dark red on hover */
 }
 
 .mini-title{
   font-weight: 900;
   margin: 2px 0 4px;
+    transition: color 0.3s ease;
+    font-size: 19px; 
+  
 }
 
 .mini-text{
@@ -617,6 +641,9 @@ body{
   box-shadow: var(--shadow-lg);
   color: var(--text);
   transition: box-shadow .25s ease, border-color .25s ease;
+
+  max-height: 520px;     
+  overflow-y: auto; 
 }
 
 .project-subtitle{
@@ -1050,4 +1077,12 @@ body{
   /* #services .service-image{
     height: 170px;
   } */
+}
+
+#why .mini-glass:hover .mini-title{
+  color: #b71c1c;
+  transition: color 0.3s ease;
+}
+#turnover .glass-panel {
+  padding: 30px;
 }

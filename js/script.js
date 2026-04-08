@@ -105,3 +105,50 @@ window.addEventListener("scroll", function (){
   navbar.classList.remove("scrolled");
   }
 })
+
+const ctx = document.getElementById('turnoverChart');
+
+if (ctx) {
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['2022-23', '2023-24', '2024-25', '2025-26'],
+      datasets: [{
+        label: 'Turnover (INR)',
+        data: [4423375.96, 2590532.66, 12870702.61, 19695861.43],
+        borderColor: '#E53935',
+        backgroundColor: 'rgba(229,57,53,0.2)'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              let value = context.raw;
+              return 'Turnover: ₹ ' + new Intl.NumberFormat('en-IN', {
+                maximumFractionDigits: 2
+              }).format(value);
+            }
+          }
+        },
+        legend: {
+          display: true
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return '₹ ' + new Intl.NumberFormat('en-IN', {
+                maximumFractionDigits: 0
+              }).format(value);
+            }
+          }
+        }
+      }
+    }
+  });
+}
