@@ -46,47 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabs.length) activate(document.querySelector(".project-switch-btn.is-active") || tabs[0]);
 
 
-  /* =========================
-     HERO SLIDER
-  ========================= */
-  const herobg = document.getElementById("herobg");
-
-  if (herobg) {
-    const images = [
-      "assets/heroimage.jpg",
-      "assets/hero2.jpg",
-      "assets/hero3.jpg",
-      "assets/hero4.jpg"
-    ];
-
-    let current = 0;
-
-    function showImage(index) {
-      herobg.classList.remove("is-zooming");
-      herobg.style.opacity = "0";
-
-      setTimeout(() => {
-        herobg.style.backgroundImage = `url('${images[index]}')`;
-        herobg.style.opacity = "1";
-
-        setTimeout(() => {
-          herobg.classList.add("is-zooming");
-        }, 50);
-      }, 600);
-    }
-
-    herobg.style.backgroundImage = `url('${images[current]}')`;
-    herobg.style.opacity = "1";
-
-    setTimeout(() => herobg.classList.add("is-zooming"), 50);
-
-    setInterval(() => {
-      current = (current + 1) % images.length;
-      showImage(current);
-    }, 5000);
-  }
-
-
+ 
   /* =========================
      NAVBAR SCROLL
   ========================= */
@@ -102,114 +62,314 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      CHART (FIXED PROPERLY)
   ========================= */
-  const ctx = document.getElementById('turnoverChart');
-let chart;
 
-if (ctx) {
+const canvas = document.getElementById('turnoverChart');
 
-  const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
-  
-gradient.addColorStop(0, 'rgba(229,57,53,1)');
-gradient.addColorStop(1, 'rgba(229,57,53,0.6)');
+if (canvas) {
 
-  chart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['2022-23', '2023-24', '2024-25', '2025-26'],
-      datasets: [{
-        label: 'Turnover (INR)',
-        data: [4423375.96, 2590532.66, 12870702.61, 19695861.43],
-        backgroundColor: gradient,
-        borderRadius: 10,
-        borderSkipped: false,
-        barThickness: 55
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: {
-        padding: {
-          top: 20,
-          right: 20,
-          left: 10,
-          bottom: 10
-        }
-      },
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          backgroundColor: '#111',
-          titleColor: '#fff',
-          bodyColor: '#ddd',
-          borderColor: '#333',
-          borderWidth: 1,
-          padding: 12,
-          displayColors: false,
-          callbacks: {
-            label: function(context) {
-              return '₹ ' + (context.raw / 1000000).toFixed(1) + ' Million';
-            }
-          }
-        },
-        datalabels: {
-          color: '#111',
-          anchor: 'end',
-          align: 'end',
-          font: {
-            weight: '700',
-            size: 13
-          },
-          formatter: function(value) {
-            return '₹' + (value / 1000000).toFixed(1) + 'M';
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: {
-            display: false
-          },
-          ticks: {
-            color: '#6b7280',
-            font: {
-              weight: '600'
-            }
-          }
-        },
-        y: {
-          grid: {
-            color: 'rgba(0,0,0,0.05)',  // softer grid
-            drawBorder: false
-          },
-          ticks: {
-            color: '#9ca3af',
-            callback: function(value) {
-              return '₹' + (value / 1000000) + 'M';
-            }
-          }
-        }
-      },
-      animation: {
-        duration: 1200,
-        easing: 'easeOutQuart'
-      }
-    },
-   plugins: typeof ChartDataLabels !== 'undefined' ? [ChartDataLabels] : []
-  });
+const growthData = [
+4423375.96,
+2590532.66,
+12870702.61,
+19695861.43
+];
 
-  setTimeout(() => {
-  chart.resize();
-  }, 300);
-  
-  window.addEventListener('resize', () => {
-    chart.resize();
-  });
+let progress = 0;
+
+
+/* =========================
+   CUSTOM ARROW + LABEL PLUGIN
+========================= */
+
+const movingArrowPlugin = {
+
+id:'movingArrow',
+
+afterDatasetsDraw(chart){
+
+const { ctx } = chart;
+
+const meta = chart.getDatasetMeta(1);
+
+if(!meta.data.length) return;
+
+ctx.save();
+
+ctx.strokeStyle='#24c24a';
+ctx.lineWidth=5;
+ctx.lineCap='round';
+
+ctx.beginPath();
+
+
+for(let i=0;i<meta.data.length-1;i++){
+
+const p1 = meta.data[i];
+const p2 = meta.data[i+1];
+
+if(progress > i){
+
+ctx.moveTo(p1.x,p1.y);
+
+let percent = Math.min(progress-i,1);
+
+let x = p1.x + (p2.x-p1.x)*percent;
+let y = p1.y + (p2.y-p1.y)*percent;
+
+ctx.lineTo(x,y);
+
+
+/* MOVING ARROW WHILE DRAWING */
+if(percent < 1){
+
+ctx.stroke();
+
+ctx.beginPath();
+
+let angle=Math.atan2(
+p2.y-p1.y,
+p2.x-p1.x
+);
+
+ctx.translate(x,y);
+ctx.rotate(angle);
+
+ctx.moveTo(0,0);
+ctx.lineTo(-15,-8);
+
+ctx.moveTo(0,0);
+ctx.lineTo(-15,8);
+
+ctx.stroke();
+
+ctx.setTransform(1,0,0,1,0,0);
+
+break;
+
+}
+
+}
+
+}
+
+ctx.stroke();
+
+
+
+/* FINAL DOT MORPHS INTO ARROW */
+if(progress >= 3.99){
+
+const last = meta.data[meta.data.length-1];
+const prev = meta.data[meta.data.length-2];
+
+let angle=Math.atan2(
+last.y-prev.y,
+last.x-prev.x
+);
+
+ctx.save();
+
+ctx.translate(last.x,last.y);
+ctx.rotate(angle);
+
+/* cover last dot visually by drawing arrow over it */
+ctx.beginPath();
+
+ctx.moveTo(-24,0);
+ctx.lineTo(0,0);
+
+ctx.stroke();
+
+ctx.beginPath();
+
+ctx.moveTo(0,0);
+ctx.lineTo(-14,-11);
+
+ctx.moveTo(0,0);
+ctx.lineTo(-14,11);
+
+ctx.stroke();
+
+ctx.restore();
+
 }
 
 
+/* PROGRESSIVE VALUE LABELS */
+ctx.save();
+
+ctx.fillStyle='#111';
+ctx.font='bold 13px Arial';
+ctx.textAlign='center';
+
+meta.data.forEach((point,index)=>{
+
+/* show label only after arrow reaches point */
+if(progress < index){
+return;
+}
+
+const value = growthData[index];
+
+const label =
+'₹'+(value/1000000).toFixed(1)+'M';
+
+let x = point.x;
+let y = point.y - 18;
+
+
+/* special position for final label */
+if(index === meta.data.length-1){
+
+x = point.x - 8;
+
+/* move DOWN, not up, so it doesn't clip */
+y = point.y + 26;
+
+}
+
+ctx.fillText(
+label,
+x,
+y
+);
+
+});
+
+ctx.restore();
+ctx.restore();
+
+}
+
+};
+
+
+
+/* =========================
+   CHART
+========================= */
+
+const chart = new Chart(canvas,{
+
+type:'bar',
+
+data:{
+
+labels:[
+'2022-23',
+'2023-24',
+'2024-25',
+'2025-26'
+],
+
+datasets:[
+
+/* TEMP BARS */
+{
+type:'bar',
+data:growthData,
+backgroundColor:'rgba(229,57,53,.35)',
+borderRadius:10,
+borderSkipped:false,
+barThickness:55
+},
+
+/* LINE COORDINATES */
+{
+type:'line',
+data:growthData,
+borderColor:'transparent',
+
+pointRadius:function(context){
+
+const index = context.dataIndex;
+const lastIndex = context.dataset.data.length-1;
+
+/* hide last dot when arrow replaces it */
+if(index===lastIndex && progress>=3.99){
+return 0;
+}
+
+return 6;
+
+},
+
+pointBackgroundColor:'#24c24a',
+tension:.35
+}
+
+]
+
+},
+
+options:{
+
+responsive:true,
+maintainAspectRatio:false,
+
+plugins:{
+legend:{
+display:false
+}
+},
+
+scales:{
+
+x:{
+grid:{
+display:false
+}
+},
+
+y:{
+grid:{
+color:'rgba(0,0,0,.05)'
+},
+ticks:{
+callback:function(v){
+return '₹'+(v/1000000)+'M';
+}
+}
+}
+
+},
+
+animation:false
+
+},
+
+plugins:[
+movingArrowPlugin
+]
+
+});
+
+
+
+/* =========================
+   START ANIMATION
+========================= */
+
+let interval=setInterval(()=>{
+
+progress += 0.03;
+
+chart.draw();
+
+if(progress>=3.99){
+
+clearInterval(interval);
+
+/* remove bars */
+chart.data.datasets[0].backgroundColor='rgba(229,57,53,0)';
+
+chart.update();
+
+}
+
+},30);
+
+}
   /* =========================
      GALLERY MODAL
   ========================= */
@@ -241,6 +401,5 @@ gradient.addColorStop(1, 'rgba(229,57,53,0.6)');
   }
 
 });
-
 
 
