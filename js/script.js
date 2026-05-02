@@ -1,7 +1,9 @@
+let slideshowInterval = null;
+
 document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================
-     PROJECT SWITCH
+     PROJECT SWITCH (FIXED)
   ========================= */
   const wrap = document.getElementById("projectSwitch");
   const tabs = document.querySelectorAll(".project-switch-btn");
@@ -25,8 +27,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function activate(btn) {
     const targetId = btn.dataset.target;
-    const imgSrc = btn.dataset.image;
 
+    const images = btn.dataset.images
+      ? btn.dataset.images.split(",")
+      : btn.dataset.image
+      ? [btn.dataset.image]
+      : [];
+
+    // CLEAR OLD INTERVAL
+    if (slideshowInterval) {
+      clearInterval(slideshowInterval);
+      slideshowInterval = null;
+    }
+
+    // UI STATE
     tabs.forEach(b => {
       const active = b === btn;
       b.classList.toggle("is-active", active);
@@ -39,14 +53,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     wrap.classList.toggle("is-panel", targetId === "panelProjects");
 
-    switchImage(imgSrc);
+    // IMAGE LOGIC
+    if (images.length > 1) {
+      let index = 0;
+
+      switchImage(images[index]);
+
+      slideshowInterval = setInterval(() => {
+        index = (index + 1) % images.length;
+        switchImage(images[index]);
+      }, 2500);
+
+    } else if (images.length === 1) {
+      switchImage(images[0]);
+    } else {
+      mainImg.src = "";
+    }
   }
 
   tabs.forEach(btn => btn.addEventListener("click", () => activate(btn)));
-  if (tabs.length) activate(document.querySelector(".project-switch-btn.is-active") || tabs[0]);
+  if (tabs.length) {
+    activate(document.querySelector(".project-switch-btn.is-active") || tabs[0]);
+  }
 
-
- 
   /* =========================
      NAVBAR SCROLL
   ========================= */
@@ -58,10 +87,127 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-
   /* =========================
-     CHART (FIXED PROPERLY)
+     CONNECTOR CANVAS (FIXED)
   ========================= */
+  const connectorCanvas = document.getElementById("connectorCanvas");
+
+  if (connectorCanvas) {
+
+    const ctx = connectorCanvas.getContext("2d");
+    let offset = 0;
+
+    function resizeCanvas() {
+      connectorCanvas.width = connectorCanvas.offsetWidth;
+      connectorCanvas.height = connectorCanvas.offsetHeight;
+    }
+
+    function getCenter(el) {
+      const rect = el.getBoundingClientRect();
+      const parentRect = connectorCanvas.getBoundingClientRect();
+
+      return {
+        x: rect.left - parentRect.left + rect.width / 2,
+        y: rect.top - parentRect.top + rect.height / 2
+      };
+    }
+
+  function getEdgeIntersection(from, to, element) {
+  const rect = element.getBoundingClientRect();
+  const parentRect = connectorCanvas.getBoundingClientRect();
+
+  const box = {
+    left: rect.left - parentRect.left,
+    right: rect.right - parentRect.left,
+    top: rect.top - parentRect.top,
+    bottom: rect.bottom - parentRect.top
+  };
+
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+
+  let tMin = Infinity;
+
+  const check = (t) => {
+    if (t > 0 && t < tMin) tMin = t;
+  };
+
+  // Check all 4 edges
+  if (dx !== 0) {
+    check((box.left - from.x) / dx);
+    check((box.right - from.x) / dx);
+  }
+  if (dy !== 0) {
+    check((box.top - from.y) / dy);
+    check((box.bottom - from.y) / dy);
+  }
+
+  return {
+    x: from.x + dx * tMin,
+    y: from.y + dy * tMin
+  };
+}
+
+    function drawLines() {
+      const scale = window.innerWidth <= 768 ? 0.38 : 1;
+
+ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      ctx.clearRect(0, 0, connectorCanvas.width, connectorCanvas.height);
+
+      const center = document.querySelector(".center-core");
+      const cards = document.querySelectorAll(".orbit-card");
+
+      if (!center || !cards.length) return;
+
+      const centerPos = getCenter(center);
+
+      cards.forEach(card => {
+        const pos = getCenter(card);
+
+      const start = getEdgeIntersection(centerPos, pos, center);
+const end = getEdgeIntersection(pos, centerPos, card);
+
+        const gradient = ctx.createLinearGradient(
+          start.x, start.y,
+          end.x, end.y
+        );
+
+        gradient.addColorStop(0, "#3b82f6");
+        gradient.addColorStop(0.5 + Math.sin(offset) * 0.2, "#60a5fa");
+        gradient.addColorStop(1, "transparent");
+
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 2;
+
+        ctx.shadowBlur = 25;
+        ctx.shadowColor = "#3b82f6";
+
+        ctx.stroke();
+      });
+
+      offset += 0.03;
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    function animateLines() {
+      drawLines();
+      requestAnimationFrame(animateLines);
+    }
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    animateLines();
+  }
+
+ /* =========================
+   CHART (RESTORED ADVANCED)
+========================= */
 
 const canvas = document.getElementById('turnoverChart');
 
@@ -76,19 +222,11 @@ const growthData = [
 
 let progress = 0;
 
-
-/* =========================
-   CUSTOM ARROW + LABEL PLUGIN
-========================= */
-
 const movingArrowPlugin = {
-
 id:'movingArrow',
-
 afterDatasetsDraw(chart){
 
 const { ctx } = chart;
-
 const meta = chart.getDatasetMeta(1);
 
 if(!meta.data.length) return;
@@ -100,7 +238,6 @@ ctx.lineWidth=5;
 ctx.lineCap='round';
 
 ctx.beginPath();
-
 
 for(let i=0;i<meta.data.length-1;i++){
 
@@ -118,12 +255,9 @@ let y = p1.y + (p2.y-p1.y)*percent;
 
 ctx.lineTo(x,y);
 
-
-/* MOVING ARROW WHILE DRAWING */
 if(percent < 1){
 
 ctx.stroke();
-
 ctx.beginPath();
 
 let angle=Math.atan2(
@@ -145,18 +279,14 @@ ctx.stroke();
 ctx.setTransform(1,0,0,1,0,0);
 
 break;
-
 }
 
 }
-
 }
 
 ctx.stroke();
 
-
-
-/* FINAL DOT MORPHS INTO ARROW */
+/* FINAL ARROW */
 if(progress >= 3.99){
 
 const last = meta.data[meta.data.length-1];
@@ -172,30 +302,22 @@ ctx.save();
 ctx.translate(last.x,last.y);
 ctx.rotate(angle);
 
-/* cover last dot visually by drawing arrow over it */
 ctx.beginPath();
-
 ctx.moveTo(-24,0);
 ctx.lineTo(0,0);
-
 ctx.stroke();
 
 ctx.beginPath();
-
 ctx.moveTo(0,0);
 ctx.lineTo(-14,-11);
-
 ctx.moveTo(0,0);
 ctx.lineTo(-14,11);
-
 ctx.stroke();
 
 ctx.restore();
-
 }
 
-
-/* PROGRESSIVE VALUE LABELS */
+/* LABELS */
 ctx.save();
 
 ctx.fillStyle='#111';
@@ -204,57 +326,32 @@ ctx.textAlign='center';
 
 meta.data.forEach((point,index)=>{
 
-/* show label only after arrow reaches point */
-if(progress < index){
-return;
-}
+if(progress < index) return;
 
 const value = growthData[index];
-
-const label =
-'₹'+(value/1000000).toFixed(1)+'M';
+const label = '₹'+(value/1000000).toFixed(1)+'M';
 
 let x = point.x;
 let y = point.y - 18;
 
-
-/* special position for final label */
 if(index === meta.data.length-1){
-
 x = point.x - 8;
-
-/* move DOWN, not up, so it doesn't clip */
 y = point.y + 26;
-
 }
 
-ctx.fillText(
-label,
-x,
-y
-);
-
+ctx.fillText(label,x,y);
 });
 
 ctx.restore();
 ctx.restore();
-
 }
-
 };
-
-
-
-/* =========================
-   CHART
-========================= */
 
 const chart = new Chart(canvas,{
 
 type:'bar',
 
 data:{
-
 labels:[
 '2022-23',
 '2023-24',
@@ -264,7 +361,6 @@ labels:[
 
 datasets:[
 
-/* TEMP BARS */
 {
 type:'bar',
 data:growthData,
@@ -274,102 +370,87 @@ borderSkipped:false,
 barThickness:55
 },
 
-/* LINE COORDINATES */
 {
 type:'line',
 data:growthData,
 borderColor:'transparent',
-
 pointRadius:function(context){
 
 const index = context.dataIndex;
 const lastIndex = context.dataset.data.length-1;
 
-/* hide last dot when arrow replaces it */
 if(index===lastIndex && progress>=3.99){
 return 0;
 }
 
 return 6;
-
 },
-
 pointBackgroundColor:'#24c24a',
 tension:.35
 }
-
 ]
-
 },
 
 options:{
-
 responsive:true,
 maintainAspectRatio:false,
-
-plugins:{
-legend:{
-display:false
-}
-},
-
+plugins:{ legend:{ display:false } },
 scales:{
-
-x:{
-grid:{
-display:false
-}
-},
-
+x:{ grid:{ display:false } },
 y:{
-grid:{
-color:'rgba(0,0,0,.05)'
-},
+grid:{ color:'rgba(0,0,0,.05)' },
 ticks:{
 callback:function(v){
 return '₹'+(v/1000000)+'M';
 }
 }
 }
-
 },
-
 animation:false
-
 },
 
-plugins:[
-movingArrowPlugin
-]
+plugins:[movingArrowPlugin]
 
 });
 
 
 
-/* =========================
-   START ANIMATION
-========================= */
+ function startAnimation() {
 
-let interval=setInterval(()=>{
+  progress = 0;
 
-progress += 0.03;
+  // restore bars
+  chart.data.datasets[0].backgroundColor = 'rgba(229,57,53,.35)';
+  chart.update();
 
-chart.draw();
+  let interval = setInterval(() => {
 
-if(progress>=3.99){
+    progress += 0.03;
+    chart.draw();
 
-clearInterval(interval);
+    if (progress >= 3.99) {
 
-/* remove bars */
-chart.data.datasets[0].backgroundColor='rgba(229,57,53,0)';
+      clearInterval(interval);
 
-chart.update();
+      // fade bars
+      chart.data.datasets[0].backgroundColor = 'rgba(229,57,53,0)';
+      chart.update();
 
+      // restart after delay
+      setTimeout(() => {
+        startAnimation();
+      }, 1500);
+
+    }
+
+  }, 30);
 }
 
-},30);
-
+// initial trigger
+startAnimation(); 
+  
 }
+
   /* =========================
      GALLERY MODAL
   ========================= */
@@ -401,5 +482,3 @@ chart.update();
   }
 
 });
-
-
